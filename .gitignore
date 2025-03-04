@@ -36,3 +36,6 @@ perf.data.old
 # Rust analyzer
 .rust-analyzer/
 
+# env
+.env
+.env.*
