@@ -1,0 +1,28 @@
+syntax = "proto3";
+package waypoint.common;
+
+// Common error message structure
+message Error {
+  uint32 code = 1;
+  string message = 2;
+  string details = 3;
+}
+
+// Pagination information
+message Pagination {
+  uint32 total = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  bool has_more = 4;
+}
+
+// Timestamp with millisecond precision
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+// Farcaster specific types
+message FarcasterID {
+  uint64 fid = 1;
+}

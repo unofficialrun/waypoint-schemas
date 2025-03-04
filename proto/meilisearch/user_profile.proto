@@ -1,0 +1,85 @@
+syntax = "proto3";
+package waypoint.meilisearch;
+
+// Import common definitions
+import "common/types.proto";
+
+// Document schema definition
+message UserProfileSchema {
+  // Index configuration
+  message IndexSettings {
+    string name = 1;
+    string primary_key = 2;
+  }
+  
+  // Searchable attributes
+  message SearchableAttributes {
+    repeated string attributes = 1;
+  }
+  
+  // Ranking settings
+  message RankingRules {
+    repeated string rules = 1;
+  }
+  
+  // Filtering settings
+  message FilterableAttributes {
+    repeated string attributes = 1;
+  }
+  
+  // Sorting settings
+  message SortableAttributes {
+    repeated string attributes = 1;
+  }
+  
+  IndexSettings index = 1;
+  SearchableAttributes searchable = 2;
+  RankingRules ranking = 3;
+  string distinct_attribute = 4;
+  FilterableAttributes filterable = 5;
+  SortableAttributes sortable = 6;
+}
+
+// Document structure for user profiles
+message UserProfile {
+  string id = 1;
+  uint64 fid = 2;
+  optional string display_name = 3;
+  optional string username = 4;
+  optional string pfp_url = 5;
+  optional string bio = 6;
+  optional string url = 7;
+  optional string location = 8;
+  optional string twitter = 9;
+  optional string github = 10;
+  uint64 updated_at = 11;
+}
+
+// Create or update user profile request
+message UpsertUserProfileRequest {
+  UserProfile profile = 1;
+}
+
+// Response for upsert user profile
+message UpsertUserProfileResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Search request for user profiles
+message SearchUserProfilesRequest {
+  string query = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  repeated string filter = 4;
+  repeated string sort = 5;
+}
+
+// Search response with profile results
+message SearchUserProfilesResponse {
+  repeated UserProfile profiles = 1;
+  uint32 total = 2;
+  uint32 limit = 3;
+  uint32 offset = 4;
+  uint64 processing_time_ms = 5;
+}

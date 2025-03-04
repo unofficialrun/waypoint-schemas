@@ -1,0 +1,19 @@
+[package]
+name = "waypoint-schemas"
+version = "0.1.0"
+edition = "2021"
+description = "Schema definitions for Waypoint services"
+license = "MIT"
+authors = ["Unofficial <contact@unofficial.run>"]
+
+[dependencies]
+prost = "0.13"
+serde = { version = "1.0", features = ["derive"] }
+meilisearch-sdk = "0.24"
+tokio = { version = "1.40", features = ["full"] }
+async-trait = "0.1"
+thiserror = "1.0"
+tracing = "0.1"
+
+[build-dependencies]
+prost-build = "0.13"

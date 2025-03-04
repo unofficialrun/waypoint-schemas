@@ -1,0 +1,47 @@
+syntax = "proto3";
+package waypoint.meilisearch;
+
+// Global settings for Meilisearch
+message MeilisearchSettings {
+  // Connection settings
+  message Connection {
+    string url = 1;
+    string api_key = 2;
+    uint32 timeout_seconds = 3;
+    bool enabled = 4;
+  }
+  
+  // Index configuration
+  message IndexConfig {
+    string name = 1;
+    string primary_key = 2;
+    repeated string searchable_attributes = 3;
+    repeated string filterable_attributes = 4;
+    repeated string sortable_attributes = 5;
+    repeated string ranking_rules = 6;
+    string distinct_attribute = 7;
+  }
+  
+  // Search settings
+  message SearchSettings {
+    uint32 default_limit = 1;
+    uint32 max_limit = 2;
+    bool highlight_matches = 3;
+  }
+  
+  Connection connection = 1;
+  repeated IndexConfig indexes = 2;
+  SearchSettings search = 3;
+}
+
+// Apply settings request
+message ApplySettingsRequest {
+  MeilisearchSettings settings = 1;
+}
+
+// Apply settings response
+message ApplySettingsResponse {
+  bool success = 1;
+  string message = 2;
+  string task_id = 3;
+}
