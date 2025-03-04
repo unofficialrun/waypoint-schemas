@@ -9,7 +9,8 @@ use waypoint_schemas::proto::meilisearch::UserProfile;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create Meilisearch client
-    let client = Client::new("http://localhost:7700", Some("masterKey"));
+    let client = Client::new("http://localhost:7700", Some("masterKey"))
+        .expect("Failed to create Meilisearch client");
 
     // Apply the schema to Meilisearch
     apply_user_profile_schema(&client).await?;
