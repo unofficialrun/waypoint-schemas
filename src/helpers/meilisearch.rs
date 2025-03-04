@@ -133,7 +133,7 @@ pub async fn apply_user_profile_schema(client: &Client) -> Result<(), Meilisearc
 
     // Distinct attribute
     if !schema.distinct_attribute.is_empty() {
-        settings = settings.with_distinct_attribute(schema.distinct_attribute.clone());
+        settings = settings.with_distinct_attribute(Some(schema.distinct_attribute.clone()));
     }
 
     // Filterable attributes
