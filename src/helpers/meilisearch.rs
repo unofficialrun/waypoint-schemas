@@ -4,6 +4,7 @@ use meilisearch_sdk::{client::Client, settings::Settings};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::{error, info};
+use chrono::{DateTime, Utc};
 
 use crate::proto::meilisearch::{UserProfile, UserProfileSchema};
 
@@ -19,6 +20,7 @@ pub enum MeilisearchSchemaError {
     #[error("Failed to convert document: {0}")]
     Conversion(String),
 }
+
 
 /// Convert from generated proto type to a Serde-friendly type
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -41,7 +43,9 @@ pub struct UserProfileDocument {
     pub twitter: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub github: Option<String>,
-    pub updated_at: u64,
+    // Just make this a String to accept whatever Meilisearch sends us
+    #[serde(default)]
+    pub updated_at: String,
 }
 
 impl From<UserProfile> for UserProfileDocument {
@@ -57,13 +61,26 @@ impl From<UserProfile> for UserProfileDocument {
             location: proto.location,
             twitter: proto.twitter,
             github: proto.github,
-            updated_at: proto.updated_at,
+            updated_at: proto.updated_at.to_string(),
         }
     }
 }
 
 impl From<UserProfileDocument> for UserProfile {
     fn from(doc: UserProfileDocument) -> Self {
+        // Convert the string timestamp to u64 if possible, or default to current time
+        let updated_at = doc.updated_at.parse::<u64>()
+            .or_else(|_| {
+                // Try to parse as ISO datetime
+                DateTime::parse_from_rfc3339(&doc.updated_at)
+                    .or_else(|_| DateTime::parse_from_str(&doc.updated_at, "%Y-%m-%dT%H:%M:%S%.f%z"))
+                    .map(|dt| dt.timestamp() as u64)
+            })
+            .unwrap_or_else(|_| {
+                // Default to current time if parsing fails
+                Utc::now().timestamp() as u64
+            });
+
         Self {
             id: doc.id,
             fid: doc.fid,
@@ -75,7 +92,7 @@ impl From<UserProfileDocument> for UserProfile {
             location: doc.location,
             twitter: doc.twitter,
             github: doc.github,
-            updated_at: doc.updated_at,
+            updated_at,
         }
     }
 }
