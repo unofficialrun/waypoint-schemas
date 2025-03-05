@@ -71,10 +71,24 @@ impl From<UserProfileDocument> for UserProfile {
         // Convert the string timestamp to u64 if possible, or default to current time
         let updated_at = doc.updated_at.parse::<u64>()
             .or_else(|_| {
-                // Try to parse as ISO datetime
-                DateTime::parse_from_rfc3339(&doc.updated_at)
-                    .or_else(|_| DateTime::parse_from_str(&doc.updated_at, "%Y-%m-%dT%H:%M:%S%.f%z"))
-                    .map(|dt| dt.timestamp() as u64)
+                // Try to parse as ISO datetime with explicit format handling
+                if doc.updated_at.contains('T') && doc.updated_at.contains('+') {
+                    // Try standard RFC3339 format first
+                    DateTime::parse_from_rfc3339(&doc.updated_at)
+                        .map(|dt| dt.timestamp() as u64)
+                        .or_else(|_| {
+                            // Try with various precise formats that might be returned by MeiliSearch
+                            DateTime::parse_from_str(&doc.updated_at, "%Y-%m-%dT%H:%M:%S%.f%:z")
+                                .or_else(|_| DateTime::parse_from_str(&doc.updated_at, "%Y-%m-%dT%H:%M:%S%.f%z"))
+                                .or_else(|_| DateTime::parse_from_str(&doc.updated_at, "%Y-%m-%dT%H:%M:%S%:z"))
+                                .or_else(|_| DateTime::parse_from_str(&doc.updated_at, "%Y-%m-%dT%H:%M:%S%z"))
+                                .map(|dt| dt.timestamp() as u64)
+                        })
+                } else {
+                    // Not a timestamp format we recognize
+                    // Return a generic parse error since we can't construct one directly
+                    Err(DateTime::parse_from_rfc3339("invalid").unwrap_err())
+                }
             })
             .unwrap_or_else(|_| {
                 // Default to current time if parsing fails
